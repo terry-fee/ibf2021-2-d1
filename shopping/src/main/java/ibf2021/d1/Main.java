@@ -20,7 +20,7 @@ public class Main
         String arguments = scan.nextLine();
 
         if (!"add".equals(command) && !"delete".equals(command) &&
-                "list".equals(command) && !"exit".equals(command)) {
+                !"list".equals(command) && !"exit".equals(command)) {
             System.out.println("Invalid command, program will exit.");
             scan.close();
             return;
@@ -30,11 +30,18 @@ public class Main
 
             if ("add".equals(command)) {
                 handler.handleAdd(command, arguments, scan);
-                System.out.println("Item(s) added.");
+                System.out.println("-- Item(s) added --");
+            }
+
+            if ("delete".equals(command)) {
+                handler.handleDelete(command, arguments, scan);
+                System.out.println("-- Item removed --");
             }
             
-            if ("list".equals(command))
+            if ("list".equals(command)) {
                 handler.handleList(command);
+                System.out.println("-- End of list --");
+            }
 
             command = scan.next();
             arguments = scan.nextLine();
