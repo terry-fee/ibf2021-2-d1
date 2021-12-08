@@ -1,17 +1,36 @@
 package ibf2021.d1;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
-public class HandleCommands 
+public class ShoppingCartDB 
 {
     private Cart cart;
+    private boolean login = false;
+    private String userName = "";
+    private String path = "";
 
-    public HandleCommands() {
+    public ShoppingCartDB() {
         cart = new Cart();
     }
 
     public Cart getCart() {
         return cart;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public void handleAdd(String command, String arguments, Scanner scan) {
@@ -102,6 +121,78 @@ public class HandleCommands
                 System.out.println("" + (i+1) + "." + cart.getCart().get(i));
 
             break;
+        }
+    }
+
+    public void handleLogin(String arguments) 
+            throws IOException {
+
+        userName = arguments.trim();
+        
+        if (!"".equals(userName))
+            login = true;
+        else
+            return;
+
+        String fileName = path + "/" + userName + ".db";
+        File file = new File(fileName);
+
+        if (!file.exists()) {
+            file.createNewFile();
+
+            try (BufferedWriter writer = 
+                new BufferedWriter(new FileWriter(fileName, true))) {
+                writer.write(fileName); 
+                writer.newLine();
+            } 
+        } else {
+
+            try (Reader reader = new FileReader(fileName)) {
+                BufferedReader br = new BufferedReader(reader);
+                String line = "";
+    
+                while (null != (line = br.readLine())) {
+
+                    if (line != null && line.contains(".db")) 
+                        continue;
+
+                    cart.addItem(line);
+                } 
+            }
+        }
+    }
+
+    public void handleSave() {
+        
+        if (login == false) {
+            System.out.println("Need to log in first before saving cart!");
+            return;
+        }
+
+        String fileName = path + "/" + userName + ".db";
+
+        try {
+            try (BufferedWriter writer = 
+                    new BufferedWriter(new FileWriter(fileName, true))) {
+                
+                for (String s : cart.getCart()) {
+                    writer.write(s); 
+                    writer.newLine();
+                }
+            } 
+        } catch (IOException ioe) {
+            System.out.println("Oops..cannot write to file.");
+        }
+
+        System.out.println("Items saved in file.");
+    }
+
+    public void handleUsers() {
+        File file = Paths.get("db").toFile();
+        
+        for (File f: file.listFiles()) {
+            String[] fileNames = f.getName().split("\\.");
+            System.out.println(fileNames[0]);
         }
     }
 }
